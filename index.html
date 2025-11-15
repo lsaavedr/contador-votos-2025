@@ -46,7 +46,15 @@
       background-color: #ff6666;
       color: white;
       width: 100%;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
+      padding: 0.7rem;
+      border: none;
+    }
+    .reset {
+      background-color: #444;
+      color: white;
+      width: 100%;
+      margin-top: 0.5rem;
       padding: 0.7rem;
       border: none;
     }
@@ -56,7 +64,11 @@
 
   <h1>Contador de votos presidenciales 2025</h1>
 
-  <p>Toque un botón para sumar un voto.</p>
+  <p>
+    Toque un botón para sumar un voto.<br>
+    <b>Antes de empezar el conteo real</b>, asegúrese de presionar
+    <i>“Reiniciar conteo”</i> para dejar todo en cero.
+  </p>
 
   <div class="buttons">
     <button onclick="addVote('kaiser')">Kaiser</button>
@@ -72,6 +84,7 @@
   </div>
 
   <button class="undo" onclick="undoLast()">Deshacer último voto</button>
+  <button class="reset" onclick="resetAll()">Reiniciar conteo</button>
 
   <table>
     <thead>
@@ -184,6 +197,25 @@
 
       const last = history.pop();
       votes[last] -= 1;
+      updateDisplay();
+      saveState();
+    }
+
+    function resetAll() {
+      const ok = confirm(
+        "¿Seguro que quieres reiniciar todos los votos?\n" +
+        "Esta acción no se puede deshacer."
+      );
+      if (!ok) return;
+
+      // Poner todos los votos en 0
+      for (const key in votes) {
+        votes[key] = 0;
+      }
+
+      // Vaciar historial
+      history.splice(0, history.length);
+
       updateDisplay();
       saveState();
     }
