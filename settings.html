@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración - Contador de votos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .option-group {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .option-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .option-row input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    .option-row button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .option-row button:hover {
+      background-color: #c0392b;
+    }
+
+    .add-option {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .add-option:hover {
+      background-color: #229954;
+    }
+
+    .reset-options {
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .reset-options:hover {
+      background-color: #d35400;
+    }
+
+    .save-button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .save-button:hover {
+      background-color: #2980b9;
+    }
+
+    .back-button {
+      background-color: #666;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .back-button:hover {
+      background-color: #555;
+    }
+
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="message"></div>
+
+  <div class="option-group">
+    <h3>Opciones actuales:</h3>
+    <div id="options-container">
+      <!-- Las opciones se cargarán dinámicamente -->
+    </div>
+  </div>
+
+  <button class="add-option" onclick="addNewOption()">Agregar nueva opción</button>
+  <button class="reset-options" onclick="resetToDefaults()">Restaurar opciones originales</button>
+  <button class="save-button" onclick="saveOptions()">Guardar cambios</button>
+  <button class="back-button" onclick="window.location.href='index.html'">Volver al contador</button>
+
+  <script>
+    const STORAGE_KEY = "contador_votos";
+    const OPTIONS_KEY = "contador_votos_opciones";
+
+    let opciones = {};
+
+    function loadOptions() {
+      try {
+        const saved = localStorage.getItem(OPTIONS_KEY);
+        if (saved) {
+          opciones = JSON.parse(saved);
+        } else {
+          // Opciones por defecto si no hay nada guardado
+          opciones = {
+            parisi: 'Parisi',
+            jara: 'Jara',
+            meo: 'MEO',
+            kaiser: 'Kaiser',
+            kast: 'Kast',
+            artes: 'Artes',
+            matthei: 'Matthei',
+            mayne: 'Mayne-Nicholls',
+            nulo: 'Nulo',
+            blanco: 'Blanco'
+          };
+        }
+      } catch (e) {
+        console.warn("Error cargando opciones:", e);
+        opciones = {};
+      }
+    }
+
+    function renderOptions() {
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      for (const key in opciones) {
+        // No mostrar nulo y blanco en la lista de opciones editables
+        if (key === 'nulo' || key === 'blanco') {
+          continue;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'option-row';
+        div.innerHTML = `
+          <input type="text" id="key_${key}" value="${key}" placeholder="ID (sin espacios)">
+          <input type="text" id="label_${key}" value="${opciones[key]}" placeholder="Nombre visible">
+          <button onclick="removeOption('${key}')">Eliminar</button>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    function addNewOption() {
+      const newKey = '';
+      opciones[newKey] = '';
+      renderOptions();
+    }
+
+    function removeOption(key) {
+      delete opciones[key];
+      renderOptions();
+    }
+
+    function resetToDefaults() {
+      if (confirm('¿Estás seguro de que quieres restaurar las opciones originales? Se perderán todas las personalizaciones.')) {
+        opciones = {
+            parisi: 'Parisi',
+            jara: 'Jara',
+            meo: 'MEO',
+            kaiser: 'Kaiser',
+            kast: 'Kast',
+            artes: 'Artes',
+            matthei: 'Matthei',
+            mayne: 'Mayne-Nicholls',
+            nulo: 'Nulo',
+            blanco: 'Blanco'
+        };
+        renderOptions();
+        showMessage('Opciones originales restauradas. Debes guardar los cambios.', 'success');
+      }
+    }
+
+    function saveOptions() {
+      const newOptions = {};
+      const container = document.getElementById('options-container');
+      const rows = container.querySelectorAll('.option-row');
+
+      for (let row of rows) {
+        const keyInput = row.querySelector('input[id^="key_"]');
+        const labelInput = row.querySelector('input[id^="label_"]');
+
+        if (keyInput && labelInput) {
+          const key = keyInput.value.trim();
+          const label = labelInput.value.trim();
+
+          if (key && label) {
+            newOptions[key] = label;
+          }
+        }
+      }
+
+      // Siempre agregar nulo y blanco al guardar
+      newOptions.nulo = 'Nulo';
+      newOptions.blanco = 'Blanco';
+
+      if (Object.keys(newOptions).length < 2) {
+        showMessage('Debe haber al menos una opción además de Nulo y Blanco', 'error');
+        return;
+      }
+
+      try {
+        // Guardar las nuevas opciones
+        localStorage.setItem(OPTIONS_KEY, JSON.stringify(newOptions));
+        opciones = newOptions;
+
+        // Reiniciar solo los votos para las opciones que ya no existen
+        const currentVotes = localStorage.getItem(STORAGE_KEY);
+        if (currentVotes) {
+          const voteData = JSON.parse(currentVotes);
+          const updatedVotes = {};
+
+          // Mantener los votos de las opciones que aún existen
+          for (const key in newOptions) {
+            if (voteData.votes && voteData.votes[key]) {
+              updatedVotes[key] = voteData.votes[key];
+            } else {
+              updatedVotes[key] = 0;
+            }
+          }
+
+          let new_history = [];
+          for (const key of voteData.history) {
+            if (newOptions[key]) {
+              new_history.push(key);
+            }
+          }
+
+          // Guardar los votos actualizados con el historial existente
+          const updatedData = {
+            votes: updatedVotes,
+            history: new_history
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+        }
+
+        showMessage('Opciones guardadas correctamente', 'success');
+      } catch (e) {
+        showMessage('Error al guardar las opciones: ' + e.message, 'error');
+      }
+    }
+
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+
+      setTimeout(() => {
+        messageDiv.textContent = '';
+        messageDiv.className = '';
+      }, 3000);
+    }
+
+    // Cargar y mostrar las opciones al iniciar
+    loadOptions();
+    renderOptions();
+  </script>
+
+</body>
+</html>

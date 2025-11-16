@@ -6,10 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       padding: 1rem;
       max-width: 600px;
       margin: auto;
+      background-color: #f5f5f5;
     }
     h1 {
       font-size: 1.3rem;
@@ -20,12 +21,23 @@
       flex-wrap: wrap;
       gap: 0.5rem;
       margin: 1rem 0;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     button {
       padding: 0.7rem 1rem;
       font-size: 1rem;
       flex: 1 1 45%;
       min-width: 100px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      filter: brightness(0.85);
     }
     table {
       border-collapse: collapse;
@@ -50,13 +62,41 @@
       padding: 0.7rem;
       border: none;
     }
+
+    .undo:hover {
+      background-color: #e55555;
+    }
+
     .reset {
       background-color: #444;
       color: white;
-      width: 100%;
       margin-top: 0.5rem;
       padding: 0.7rem;
       border: none;
+      flex: 3;
+    }
+
+    .reset:hover {
+      background-color: #555;
+    }
+
+    .settings {
+      background-color: #666;
+      color: white;
+      margin-top: 0.5rem;
+      padding: 0.7rem;
+      border: none;
+      flex: 1;
+    }
+
+    .settings:hover {
+      background-color: #777;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
     }
   </style>
 </head>
@@ -65,26 +105,20 @@
   <h1>Contador de votos presidenciales 2025</h1>
 
   <p>
-    Toque un botón para sumar un voto.<br>
     <b>Antes de empezar el conteo real</b>, asegúrese de presionar
     <i>“Reiniciar conteo”</i> para dejar todo en cero.
   </p>
 
-  <div class="buttons">
-    <button onclick="addVote('kaiser')">Kaiser</button>
-    <button onclick="addVote('kast')">Kast</button>
-    <button onclick="addVote('matthei')">Matthei</button>
-    <button onclick="addVote('parisi')">Parisi</button>
-    <button onclick="addVote('mayne')">Mayne-Nicholls</button>
-    <button onclick="addVote('meo')">MEO</button>
-    <button onclick="addVote('jara')">Jara</button>
-    <button onclick="addVote('artes')">Artes</button>
-    <button onclick="addVote('nulo')">Nulo</button>
-    <button onclick="addVote('blanco')">Blanco</button>
+  <div class="buttons" id="buttons-container">
+    <!-- Los botones se generarán dinámicamente con JavaScript -->
   </div>
 
   <button class="undo" onclick="undoLast()">Deshacer último voto</button>
-  <button class="reset" onclick="resetAll()">Reiniciar conteo</button>
+
+  <div class="button-row">
+    <button class="settings" onclick="window.location.href='settings.html'">Menú</button>
+    <button class="reset" onclick="resetAll()">Reiniciar conteo</button>
+  </div>
 
   <table>
     <thead>
@@ -93,17 +127,8 @@
         <th>Votos</th>
       </tr>
     </thead>
-    <tbody>
-      <tr><td>Kaiser</td><td id="kaiser_vt">0</td></tr>
-      <tr><td>Kast</td><td id="kast_vt">0</td></tr>
-      <tr><td>Matthei</td><td id="matthei_vt">0</td></tr>
-      <tr><td>Parisi</td><td id="parisi_vt">0</td></tr>
-      <tr><td>Mayne-Nicholls</td><td id="mayne_vt">0</td></tr>
-      <tr><td>MEO</td><td id="meo_vt">0</td></tr>
-      <tr><td>Jara</td><td id="jara_vt">0</td></tr>
-      <tr><td>Artes</td><td id="artes_vt">0</td></tr>
-      <tr><td>Nulo</td><td id="nulo_vt">0</td></tr>
-      <tr><td>Blanco</td><td id="blanco_vt">0</td></tr>
+    <tbody id="table-body">
+      <!-- Las filas se generarán dinámicamente con JavaScript -->
     </tbody>
   </table>
 
@@ -112,20 +137,54 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "contador_votos_2025";
+    const STORAGE_KEY = "contador_votos";
+    const OPTIONS_KEY = "contador_votos_opciones";
 
-    const votes = {
-      kaiser: 0,
-      kast: 0,
-      matthei: 0,
-      parisi: 0,
-      mayne: 0,
-      meo: 0,
-      jara: 0,
-      artes: 0,
-      nulo: 0,
-      blanco: 0
+    // Opciones por defecto
+    const defaultOptions = {
+      parisi: 'Parisi',
+      jara: 'Jara',
+      meo: 'MEO',
+      kaiser: 'Kaiser',
+      kast: 'Kast',
+      artes: 'Artes',
+      matthei: 'Matthei',
+      mayne: 'Mayne-Nicholls',
+      nulo: 'Nulo',
+      blanco: 'Blanco'
     };
+
+    // Cargar opciones desde localStorage o usar por defecto
+    let opciones = {};
+    function loadOptions() {
+      try {
+        const saved = localStorage.getItem(OPTIONS_KEY);
+        if (saved) {
+          opciones = JSON.parse(saved);
+        } else {
+          opciones = {...defaultOptions};
+          saveOptions();
+        }
+      } catch (e) {
+        console.warn("Error cargando opciones:", e);
+        opciones = {...defaultOptions};
+      }
+    }
+
+    function saveOptions() {
+      try {
+        localStorage.setItem(OPTIONS_KEY, JSON.stringify(opciones));
+      } catch (e) {
+        console.warn("No se pudo guardar las opciones:", e);
+      }
+    }
+
+    loadOptions();
+
+    const votes = {};
+    Object.keys(opciones).forEach(key => {
+      votes[key] = 0;
+    });
 
     const history = [];
 
@@ -161,6 +220,29 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       } catch (e) {
         console.warn("No se pudo guardar el estado:", e);
+      }
+    }
+
+    function generateButtons() {
+      const container = document.getElementById('buttons-container');
+      container.innerHTML = '';
+
+      for (const key in opciones) {
+        const button = document.createElement('button');
+        button.textContent = opciones[key];
+        button.onclick = () => addVote(key);
+        container.appendChild(button);
+      }
+    }
+
+    function generateTableRows() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      for (const key in opciones) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${opciones[key]}</td><td id="${key}_vt">0</td>`;
+        tbody.appendChild(row);
       }
     }
 
@@ -222,6 +304,8 @@
 
     // Al cargar la página:
     loadState();
+    generateButtons();
+    generateTableRows();
     updateDisplay();
   </script>
 
