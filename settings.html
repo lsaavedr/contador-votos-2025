@@ -153,8 +153,8 @@
   <button class="back-button" onclick="window.location.href='index.html'">Volver al contador</button>
 
   <script>
-    const STORAGE_KEY = "contador_votos";
-    const OPTIONS_KEY = "contador_votos_opciones";
+    const STORAGE_KEY = "contador_votos_2v";
+    const OPTIONS_KEY = "contador_votos_opciones_2v";
 
     let opciones = {};
 
@@ -166,14 +166,8 @@
         } else {
           // Opciones por defecto si no hay nada guardado
           opciones = {
-            parisi: 'Parisi',
             jara: 'Jara',
-            meo: 'MEO',
-            kaiser: 'Kaiser',
             kast: 'Kast',
-            artes: 'Artes',
-            matthei: 'Matthei',
-            mayne: 'Mayne-Nicholls',
             nulo: 'Nulo',
             blanco: 'Blanco'
           };
@@ -219,14 +213,8 @@
     function resetToDefaults() {
       if (confirm('¿Estás seguro de que quieres restaurar las opciones originales? Se perderán todas las personalizaciones.')) {
         opciones = {
-            parisi: 'Parisi',
             jara: 'Jara',
-            meo: 'MEO',
-            kaiser: 'Kaiser',
             kast: 'Kast',
-            artes: 'Artes',
-            matthei: 'Matthei',
-            mayne: 'Mayne-Nicholls',
             nulo: 'Nulo',
             blanco: 'Blanco'
         };
